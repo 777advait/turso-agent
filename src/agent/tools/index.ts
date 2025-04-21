@@ -1,4 +1,3 @@
-import { generateSQLQuery } from "./generate-sql-query";
-import { generateStandaloneQuestion } from "./generate-standalone-question";
+import { standaloneQuestionTool } from "./standalone-question.tool";
 
-export const tools = [generateSQLQuery, generateStandaloneQuestion];
+export const tools = [standaloneQuestionTool];
