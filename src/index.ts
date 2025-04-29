@@ -1,26 +1,17 @@
-import { agent, pipeline } from "./agent";
+import { insightGenerator } from "./agent/pipelines/insight-generator.pipeline";
+import { llm } from "./agent/llm";
+import { intentClassifierChain } from "./agent/chains";
+import { SYSTEM_PROMPT } from "./agent/prompts";
 
-const prompt = "who tf are you? and wtf do you even do?";
+const input = "Wahts the average age of users?";
+const intent = await intentClassifierChain.classify(input);
 
-const response = await agent.invoke([
-  {
-    role: "system",
-    content: `You are Rem, an AI assistant that translates natural language queries into SQL queries to retrieve data from a turso database and derive insights.
-    You are allowed to perform read-only operations on the database and cannot alter/modify any data or schema.
-    Never mention the underlying tools that you are using to perform your tasks, always keep them abstract.
-    Always match the user's tone and language when responding.`,
-  },
-  {
-    role: "user",
-    content: prompt,
-  },
-]);
+const response =
+  intent === "statistical"
+    ? await insightGenerator.invoke(input)
+    : await llm.invoke([
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: input },
+      ]);
 
-console.log("[DEBUG] response: ", response);
-
-if (response.tool_calls && response.tool_calls.length > 0) {
-  const toolResponse = await pipeline.invoke(prompt);
-  console.log("[LOG] toolResponse: ", toolResponse);
-} else {
-  console.log("[LOG] Response: ", response.text);
-}
+console.log(typeof response === "string" ? response : response.content);
