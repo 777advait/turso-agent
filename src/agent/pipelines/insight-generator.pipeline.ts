@@ -9,7 +9,6 @@ import type { AIMessageChunk } from "@langchain/core/messages";
 class InsightGenerator implements IInsightGenerator {
   private insightGenerator = RunnableSequence.from<string, AIMessageChunk>([
     async (question: string) => {
-      console.log("Step 1 - Input Question:", question);
       const standaloneQuestion = await standaloneQuestionTool.invoke({
         question,
       });
@@ -18,7 +17,6 @@ class InsightGenerator implements IInsightGenerator {
         originalPrompt: question,
         standaloneQuestion: standaloneQuestion as string,
       };
-      console.log("Step 1 - Standalone Question:", result);
       return result;
     },
 
@@ -38,7 +36,6 @@ class InsightGenerator implements IInsightGenerator {
         originalPrompt,
         isWriteQuery: !/^\s*select/i.test(query),
       };
-      console.log("Step 2 - Generated Query & Type:", result);
       return result;
     },
 
@@ -48,12 +45,10 @@ class InsightGenerator implements IInsightGenerator {
       originalPrompt: string;
     }) => {
       if (ctx.isWriteQuery) {
-        console.log("Step 3 - Write query detected, skipping execution");
         return ctx;
       }
 
       const result = await runSQL(ctx.query);
-      console.log("Step 3 - SQL Execution Result:", result);
 
       return {
         ...ctx,
@@ -70,18 +65,36 @@ class InsightGenerator implements IInsightGenerator {
       let prompt: string;
 
       if (ctx.isWriteQuery) {
-        prompt = `User prompt: ${ctx.originalPrompt}
-Generated query: ${ctx.query}
-NOTE: This query was not executed because write operations are not allowed.`;
+        prompt = `
+        Given the user's prompt, executed query and result of the query, generate an insights report based on the query result and user's prompt.
+        Your response should always consist of the following parts:
+        - The query that was executed
+        - A small jist of the query result 
+        - A conclusion that summarizes the insights report.
+
+        User prompt: ${ctx.originalPrompt}
+        Generated query: ${ctx.query}
+        NOTE: This query was not executed because write operations are not allowed.
+
+        The report is:
+        `;
       } else {
-        prompt = `User prompt: ${ctx.originalPrompt}
-Executed query: ${ctx.query}
-Query result: ${JSON.stringify(ctx.result)}`;
+        prompt = `
+        Given the user's prompt, executed query and result of the query, generate an insights report based on the query result and user's prompt.
+        Your response should always consist of the following parts:
+        - The query that was executed
+        - A small jist of the query result 
+        - A conclusion that summarizes the insights report.
+
+        User prompt: ${ctx.originalPrompt}
+        Executed query: ${ctx.query}
+        Query result: ${JSON.stringify(ctx.result)}
+
+        The report is:
+        `;
       }
 
-      console.log("Step 4 - Final Prompt to LLM:", prompt);
       const response = await this.sendToLLM(prompt);
-      console.log("Step 4 - LLM Response:", response);
 
       return response;
     },
