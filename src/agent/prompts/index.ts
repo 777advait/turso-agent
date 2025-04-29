@@ -19,3 +19,17 @@ Question: {question}
 
 Standalone question:
 `;
+
+export const QUERY_GENERATOR_PROMPT = `
+Given a standalone question, generate a meaningful SQL query to retrieve data from the turso (sqlite) database based on the provided schema.
+- output only the SQL query.
+- no backticks or comments
+- no explanation
+- the generated query should be meaningful and relevant to the user's intent
+- the generated query should not just satisfy the solution for the standalone question but also be meaningful and easier for the user to understand and derive insights, including more human-readable and unique attributes like usernames and emails rather than IDs and names.
+Standalone question: {question}
+Schema: {schema}
+
+SQL query:
+
+`;

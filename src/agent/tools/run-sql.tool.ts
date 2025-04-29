@@ -1,3 +1,5 @@
-async function runSql(prompt: string) {
-  const sqlTemplate = `Given a `
+import { db } from "@/database";
+
+export async function runSQL(query: string) {
+  return await db.execute(query);
 }

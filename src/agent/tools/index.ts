@@ -1,3 +1,3 @@
-import { standaloneQuestionTool } from "./standalone-question.tool";
-
-export const tools = [standaloneQuestionTool];
+export * from "./run-sql.tool";
+export * from "./standalone-question.tool";
+export * from "./query-generator.tool";

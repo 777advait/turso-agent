@@ -2,7 +2,7 @@ import { tool } from "@langchain/core/tools";
 import { z } from "zod";
 import { standaloneQuestionChain } from "../chains";
 
-const standaloneQuestionTool = tool(
+export const standaloneQuestionTool = tool(
   async ({ question }: { question: string }) =>
     await standaloneQuestionChain.generateStandaloneQuestion(question),
   {
@@ -18,5 +18,3 @@ const standaloneQuestionTool = tool(
     }),
   }
 );
-
-export { standaloneQuestionTool };
